@@ -1,8 +1,13 @@
+'use client';
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
+import { ConfigProvider } from 'antd';
 
-import useParamRouter from './hooks/useParamRouter';
-import { getAllTasks } from './api';
+import useParamRouter from '@/app/hooks/useParamRouter';
+import { getAllTasks } from '@/modules/Tasks/api';
+import SearchContainer from '@/modules/Tasks/containers/SearchContainer';
+import ListTableContainer from '@/modules/Tasks/containers/ListTableContainer';
 
 export default function Home() {
   const { page, sort, search } = useParamRouter();
@@ -11,9 +16,8 @@ export default function Home() {
 
   const [data, setData] = useState({
     page: 0,
-    results: [],
-    total_pages: 0,
-    total_results: 0,
+    rows: [],
+    totalPages: 0,
   });
   const [isLoading, setIsLoading] = useState(false);
 
@@ -26,7 +30,7 @@ export default function Home() {
     setIsLoading(true);
     try {
       const res = await getAllTasks(page, sort, search);
-      setData(res.data);
+      setData(res?.data || []);
     } catch (error) {
       console.log(error);
     } finally {
@@ -39,8 +43,11 @@ export default function Home() {
   }, [page, getData]);
 
   return (
-    <main className={`flex min-h-screen flex-col items-center justify-between`}>
-      {/* <MovieContainer data={data} isLoading={isLoading} genresList={genreList} /> */}
-    </main>
+    <ConfigProvider theme={{ hashed: false }}>
+      <main className="flex min-h-screen flex-col items-center px-48 pt-36 pb-16">
+        <SearchContainer />
+        <ListTableContainer isLoading={isLoading} data={data} />
+      </main>
+    </ConfigProvider>
   );
 }

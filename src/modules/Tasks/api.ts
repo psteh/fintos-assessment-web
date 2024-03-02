@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-import { API_URL } from './constants';
+import { API_URL } from '@/app/constants';
 
 export const getAllTasks = async (
   page: number = 1,
@@ -35,11 +35,8 @@ export const updateTask = async (
     name: string;
     description: string;
     dueDate: string;
-    status: string;
   },
 ) => {
-  const res = await axios.put(`${API_URL}/tasks/${id}`, {
-    body,
-  });
+  const res = await axios.put(`${API_URL}/tasks/${id}`, body);
   return res;
 };
