@@ -23,9 +23,7 @@ export const createTask = async (body: {
   dueDate: string;
   status: string;
 }) => {
-  const res = await axios.post(`${API_URL}/tasks`, {
-    body,
-  });
+  const res = await axios.post(`${API_URL}/tasks`, body);
   return res;
 };
 

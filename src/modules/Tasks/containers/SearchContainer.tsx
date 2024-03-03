@@ -7,6 +7,11 @@ const { Search } = Input;
 
 interface ISearchContainer {}
 
+const StyledSearchContainer = styled.div`
+  width: 100%;
+  margin-bottom: 8px;
+`;
+
 const StyledSearch = styled(Search)`
   .ant-input-wrapper,
   .ant-input-affix-wrapper,
@@ -56,7 +61,7 @@ const SearchContainer: FC<ISearchContainer> = () => {
   const onChange = (e: BaseSyntheticEvent) => setValue(e.target.value);
 
   return (
-    <div className="w-full mb-4">
+    <StyledSearchContainer>
       <StyledSearch
         placeholder="Search..."
         allowClear
@@ -65,7 +70,7 @@ const SearchContainer: FC<ISearchContainer> = () => {
         onChange={onChange}
         onSearch={handleSearch}
       />
-    </div>
+    </StyledSearchContainer>
   );
 };
 
