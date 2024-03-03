@@ -31,3 +31,11 @@ body {
     text-wrap: balance;
   }
 }
+
+.mr-4 {
+  margin-right: 4px;
+}
+
+.mr-8 {
+  margin-right: 4px;
+}

@@ -1,14 +1,20 @@
 'use client';
 
-import React, { FC, useState } from 'react';
+import React, { FC } from 'react';
 import { useSearchParams, usePathname, useRouter } from 'next/navigation';
 import type { PaginationProps, TableProps } from 'antd';
 import { Pagination, Spin, Table } from 'antd';
 import styled from 'styled-components';
 import dayjs from 'dayjs';
 
-import { STATUS_MAP, DATE_TIME_FORMAT } from '@/app/constants';
+import {
+  STATUS_MAP,
+  DATE_TIME_FORMAT,
+  FORM_TYPE,
+  DUE_SOON_DAYS,
+} from '@/app/constants';
 import TaskFormModal from '@/modules/Tasks/components/TaskFormModal';
+import useParamRouter from '@/app/hooks/useParamRouter';
 
 interface IData {
   _id: string;
@@ -30,6 +36,10 @@ interface IListTableContainer {
   };
 }
 
+const StyledListTableContainer = styled.div`
+  width: 100%;
+`;
+
 const StyledPagination = styled(Pagination)`
   li,
   a,
@@ -50,10 +60,7 @@ const ListTableContainer: FC<IListTableContainer> = ({ data, isLoading }) => {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
-
-  const [isOpen, setIsOpen] = useState(false);
-  const [movieId, setMovieId] = useState('');
-  const [movieTitle, setMovieTitle] = useState('');
+  const { set } = useParamRouter();
 
   const { rows, totalPages } = data;
   const current = Number(searchParams.get('page'));
@@ -75,17 +82,35 @@ const ListTableContainer: FC<IListTableContainer> = ({ data, isLoading }) => {
       dataIndex: 'dueDate',
       key: 'dueDate',
       render: (date) => dayjs(date).format(DATE_TIME_FORMAT),
+      sorter: true,
     },
     {
       title: 'status',
       key: 'status',
       dataIndex: 'status',
-      render: (status) => STATUS_MAP?.[status] || status,
+      render: (status, record) => {
+        if (dayjs().isAfter(record.dueDate)) {
+          return STATUS_MAP.OVERDUE;
+        } else if (dayjs(record.dueDate).diff(dayjs(), 'd') < DUE_SOON_DAYS) {
+          return STATUS_MAP.DUE_SOON;
+        } else {
+          return STATUS_MAP.NOT_URGENT;
+        }
+      },
+    },
+    {
+      title: 'Created Date',
+      dataIndex: 'createdAt',
+      key: 'createdAt',
+      render: (date) => dayjs(date).format(DATE_TIME_FORMAT),
+      sorter: true,
     },
     {
       title: 'Action',
       key: 'action',
-      render: (_, record) => <TaskFormModal data={record} />,
+      render: (_, record) => (
+        <TaskFormModal formMode={FORM_TYPE.EDIT} data={record} />
+      ),
     },
   ];
 
@@ -97,45 +122,40 @@ const ListTableContainer: FC<IListTableContainer> = ({ data, isLoading }) => {
     }
   };
 
-  const onClick = (id: string | number, title: string) => {
-    setIsOpen(true);
-    setMovieId(String(id));
-    setMovieTitle(title);
+  const handleTableChange: TableProps['onChange'] = (
+    pagination,
+    filter,
+    sorter,
+  ) => {
+    // no idea why SorterResult have any
+    // @ts-ignore
+    const { field, order } = sorter;
+    let sort = 'createdAt';
+
+    if (order === 'descend') {
+      sort = `-${field}`;
+    } else {
+      sort = field;
+    }
+
+    set({ sort });
   };
 
-  const onCancel = () => setIsOpen(false);
-
   return (
-    <div className="w-full">
+    <StyledListTableContainer>
       {isLoading ? (
         <div className="flex justify-center align-middle">
           <Spin size="large" />
         </div>
       ) : (
-        <>
-          <div>
-            <Table
-              className="w-full"
-              dataSource={data?.rows || []}
-              columns={columns}
-            />
-            {/* <StyledPagination
-              current={current}
-              onChange={onChange}
-              total={totalPages}
-              showSizeChanger={false}
-            /> */}
-          </div>
-
-          {/* <MovieModal
-            id={movieId}
-            title={movieTitle}
-            isOpen={isOpen}
-            onCancel={onCancel}
-          /> */}
-        </>
+        <Table
+          className="w-full"
+          dataSource={data?.rows || []}
+          columns={columns}
+          onChange={handleTableChange}
+        />
       )}
-    </div>
+    </StyledListTableContainer>
   );
 };
 

@@ -8,3 +8,10 @@ export const STATUS_MAP: { [key: string]: string } = {
 };
 
 export const DATE_TIME_FORMAT: string = 'DD MMM YYYY';
+
+export const FORM_TYPE: { [key: string]: string } = {
+  CREATE: 'CREATE',
+  EDIT: 'EDIT',
+};
+
+export const DUE_SOON_DAYS: number = 7;

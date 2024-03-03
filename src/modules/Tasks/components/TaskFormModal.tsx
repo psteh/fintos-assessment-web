@@ -1,30 +1,28 @@
 import React, { FC, useState } from 'react';
 import { Modal, Button } from 'antd';
 
-import TaskFormContainer from '@/modules/Tasks/containers/TaskFormContainer';
+import { IData } from '@/app/interfaces/Tasks';
+import CreateTaskFormContainer from '@/modules/Tasks/containers/CreateTaskFormContainer';
+import UpdateTaskFormContainer from '@/modules/Tasks/containers/UpdateTaskFormContainer';
+import { FORM_TYPE } from '@/app/constants';
 
-interface IData {
-  data: {
-    _id: string;
-    name: string;
-    description: string;
-    dueDate: string;
-    status: string;
-    createdAt: string;
-    updatedAt: string;
-    deletedAt: string;
-  };
+interface ITaskFormModal {
+  formMode: string;
+  data?: IData;
 }
 
-interface ITaskFormModal extends IData {}
-
-const TaskFormModal: FC<ITaskFormModal> = ({ data }) => {
+const TaskFormModal: FC<ITaskFormModal> = ({
+  formMode = FORM_TYPE.CREATE,
+  data,
+}) => {
   const [isShow, setIsShow] = useState(false);
+
+  const isEditMode = formMode === FORM_TYPE.EDIT && data;
 
   return (
     <>
       <Button type="primary" onClick={() => setIsShow(true)}>
-        Edit
+        {isEditMode ? 'Edit' : 'Create'}
       </Button>
       <Modal
         open={isShow}
@@ -33,7 +31,11 @@ const TaskFormModal: FC<ITaskFormModal> = ({ data }) => {
         footer={null}
         onCancel={() => setIsShow(false)}
       >
-        <TaskFormContainer data={data} setIsShow={setIsShow} />
+        {isEditMode ? (
+          <UpdateTaskFormContainer data={data} setIsShow={setIsShow} />
+        ) : (
+          <CreateTaskFormContainer setIsShow={setIsShow} />
+        )}
       </Modal>
     </>
   );
