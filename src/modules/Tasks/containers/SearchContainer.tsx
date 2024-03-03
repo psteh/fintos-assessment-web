@@ -30,7 +30,7 @@ const SearchContainer: FC<ISearchContainer> = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [value, setValue] = useState('');
+  const [value, setValue] = useState(null);
 
   const search = searchParams.get('search') || '';
 

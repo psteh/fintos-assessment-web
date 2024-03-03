@@ -1,8 +1,8 @@
 'use client';
 
 import React, { FC } from 'react';
-import { useSearchParams, usePathname, useRouter } from 'next/navigation';
-import type { PaginationProps, TableProps } from 'antd';
+import { useSearchParams } from 'next/navigation';
+import type { TableProps } from 'antd';
 import { Pagination, Spin, Table } from 'antd';
 import styled from 'styled-components';
 import dayjs from 'dayjs';
@@ -15,17 +15,7 @@ import {
 } from '@/app/constants';
 import TaskFormModal from '@/modules/Tasks/components/TaskFormModal';
 import useParamRouter from '@/app/hooks/useParamRouter';
-
-interface IData {
-  _id: string;
-  name: string;
-  description: string;
-  dueDate: string;
-  status: string;
-  createdAt: string;
-  updatedAt: string;
-  deletedAt: string;
-}
+import { IData } from '@/app/interfaces/Tasks';
 
 interface IListTableContainer {
   isLoading: boolean;
@@ -33,6 +23,7 @@ interface IListTableContainer {
     page: number;
     rows: Array<IData>;
     totalPages: number;
+    totalDocuments: number;
   };
 }
 
@@ -40,31 +31,14 @@ const StyledListTableContainer = styled.div`
   width: 100%;
 `;
 
-const StyledPagination = styled(Pagination)`
-  li,
-  a,
-  .ant-pagination-item,
-  .ant-pagination-item-link,
-  .ant-pagination-item-link {
-    color: rgba(255, 255, 255, 0.75) !important;
-  }
-
-  .ant-pagination-item-active,
-  .ant-pagination-item-active > a {
-    border-color: rgb(0, 72, 172) !important;
-    color: rgb(0, 72, 172) !important;
-  }
-`;
+const StyledPagination = styled(Pagination)``;
 
 const ListTableContainer: FC<IListTableContainer> = ({ data, isLoading }) => {
-  const pathname = usePathname();
-  const router = useRouter();
   const searchParams = useSearchParams();
   const { set } = useParamRouter();
 
-  const { rows, totalPages } = data;
+  const { totalDocuments } = data;
   const current = Number(searchParams.get('page'));
-  const query = searchParams.get('query') || '';
 
   const columns: TableProps<IData>['columns'] = [
     {
@@ -114,14 +88,6 @@ const ListTableContainer: FC<IListTableContainer> = ({ data, isLoading }) => {
     },
   ];
 
-  const onChange: PaginationProps['onChange'] = (page) => {
-    if (query && query.length > 0) {
-      router.push(`${pathname}?page=${page}&query=${query}`);
-    } else {
-      router.push(`${pathname}?page=${page}`);
-    }
-  };
-
   const handleTableChange: TableProps['onChange'] = (
     pagination,
     filter,
@@ -148,12 +114,21 @@ const ListTableContainer: FC<IListTableContainer> = ({ data, isLoading }) => {
           <Spin size="large" />
         </div>
       ) : (
-        <Table
-          className="w-full"
-          dataSource={data?.rows || []}
-          columns={columns}
-          onChange={handleTableChange}
-        />
+        <>
+          <Table
+            className="w-full"
+            dataSource={data?.rows || []}
+            columns={columns}
+            pagination={{ hideOnSinglePage: true }}
+            onChange={handleTableChange}
+          />
+          <StyledPagination
+            current={current}
+            total={totalDocuments}
+            showSizeChanger={false}
+            onChange={(page) => set({ page })}
+          />
+        </>
       )}
     </StyledListTableContainer>
   );
