@@ -20,21 +20,6 @@ const StyledSearch = styled(Search)`
     font-size: 24px;
   }
 
-  .ant-input,
-  .ant-input-wrapper {
-    * {
-      border-color: rgb(119, 111, 98) !important;
-    }
-  }
-
-  .ant-input,
-  .ant-input-affix-wrapper,
-  .ant-input-group-addon > button,
-  .ant-input::placeholder {
-    background-color: rgb(24, 26, 27) !important;
-    color: rgba(232, 230, 227, 0.88) !important;
-  }
-
   .ant-input-group-addon > button {
     width: 64px !important;
   }
